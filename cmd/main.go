@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"os"
 
 	"github.com/espiridonova/go_final_project/pkg/api"
@@ -26,6 +27,12 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defer func() {
+		err := db.Close()
+		if err != nil {
+			fmt.Println("Error closing database")
+		}
+	}()
 
 	api.Init()
 

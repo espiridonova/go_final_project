@@ -18,24 +18,29 @@ type SignInResp struct {
 }
 
 func signInHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
 	var signInReq *SignInReq
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		writeJson(w, &ErrorResp{"internal server error"})
+		writeJson(w, http.StatusInternalServerError, &ErrorResp{"internal server error"})
 		return
 	}
 	defer r.Body.Close()
 
 	err = json.Unmarshal(body, &signInReq)
 	if err != nil {
-		writeJson(w, &ErrorResp{"error unmarshal"})
+		writeJson(w, http.StatusInternalServerError, &ErrorResp{"error unmarshal"})
 		return
 	}
 
 	pass := os.Getenv("TODO_PASSWORD")
 	if pass == "" || signInReq.Password != pass {
-		writeJson(w, &ErrorResp{"Неверный пароль"})
+		writeJson(w, http.StatusUnauthorized, &ErrorResp{"Неверный пароль"})
 		return
 	}
 
@@ -47,8 +52,8 @@ func signInHandler(w http.ResponseWriter, r *http.Request) {
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	signedToken, err := jwtToken.SignedString(secret)
 	if err != nil {
-		writeJson(w, &ErrorResp{"failed to sign jwt"})
+		writeJson(w, http.StatusInternalServerError, &ErrorResp{"failed to sign jwt"})
 		return
 	}
-	writeJson(w, &SignInResp{signedToken})
+	writeJson(w, http.StatusOK, &SignInResp{signedToken})
 }

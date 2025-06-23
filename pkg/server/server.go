@@ -10,8 +10,6 @@ import (
 const defaultPort = 7540
 
 func Run() error {
-	println("server start")
-
 	port := defaultPort
 	portParam := os.Getenv("TODO_PORT")
 	if portParam != "" {
@@ -21,6 +19,8 @@ func Run() error {
 			return err
 		}
 	}
+
+	fmt.Printf("server start; port:%d\n", port)
 
 	http.Handle("/", http.FileServer(http.Dir("web")))
 

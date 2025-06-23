@@ -15,36 +15,36 @@ func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		writeJson(w, &ErrorResp{"internal server error"})
+		writeJson(w, http.StatusInternalServerError, &ErrorResp{"internal server error"})
 		return
 	}
 	defer r.Body.Close()
 
 	err = json.Unmarshal(body, &task)
 	if err != nil {
-		writeJson(w, &ErrorResp{"error unmarshal"})
+		writeJson(w, http.StatusInternalServerError, &ErrorResp{"error unmarshal"})
 		return
 	}
 
 	if task.Title == "" {
-		writeJson(w, &ErrorResp{"title is empty"})
+		writeJson(w, http.StatusBadRequest, &ErrorResp{"title is empty"})
 		return
 	}
 
 	err = checkDate(task)
 	if err != nil {
 		msg := fmt.Sprintf("invalid task date: %s; err: %s", task.Date, err)
-		writeJson(w, &ErrorResp{msg})
+		writeJson(w, http.StatusBadRequest, &ErrorResp{msg})
 		return
 	}
 
 	id, err := db.AddTask(task)
 	if err != nil {
-		writeJson(w, &ErrorResp{err.Error()})
+		writeJson(w, http.StatusInternalServerError, &ErrorResp{err.Error()})
 		return
 	}
 
-	writeJson(w, &ShortTask{id})
+	writeJson(w, http.StatusBadRequest, &ShortTask{id})
 }
 
 func checkDate(task *db.Task) error {

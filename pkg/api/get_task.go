@@ -9,20 +9,20 @@ import (
 func getTaskHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("id")
 	if id == "" {
-		writeJson(w, &ErrorResp{"Не указан идентификатор"})
+		writeJson(w, http.StatusBadRequest, &ErrorResp{"Не указан идентификатор"})
 		return
 	}
 
 	task, err := db.GetTask(id)
 	if err != nil {
-		writeJson(w, &ErrorResp{err.Error()})
+		writeJson(w, http.StatusInternalServerError, &ErrorResp{err.Error()})
 		return
 	}
 
 	if task == nil {
-		writeJson(w, &ErrorResp{"Задача не найдена"})
+		writeJson(w, http.StatusNotFound, &ErrorResp{"Задача не найдена"})
 		return
 	}
 
-	writeJson(w, task)
+	writeJson(w, http.StatusOK, task)
 }

@@ -1,11 +1,17 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 )
 
 func nextDayHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
 	nowParam := r.FormValue("now")
 	date := r.FormValue("date")
 	repeat := r.FormValue("repeat")
@@ -19,9 +25,16 @@ func nextDayHandler(w http.ResponseWriter, r *http.Request) {
 	res, err := NextDate(now, date, repeat)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		_, err = w.Write([]byte(err.Error()))
+		if err != nil {
+			fmt.Println(err)
+		}
 		return
 	}
+
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(res))
+	_, err = w.Write([]byte(res))
+	if err != nil {
+		fmt.Println(err)
+	}
 }
